@@ -23,14 +23,21 @@ export class TcpService implements OnModuleInit {
     });
 
     this.client.on('data', async (data) => {
-      const receivedData = data.toString();
-      const processedData = this.dataService.processData(receivedData); // Procesa los datos
+      try {
+        const receivedData = data.toString();
+        const processedData = this.dataService.processData(receivedData); // Procesa los datos y los obtiene
+        //console.log(processedData);
+        // Serializa los datos a JSON antes de enviarlos a la cola
+        const serializedData = JSON.stringify(processedData);
 
-      // Serializa los datos a JSON antes de enviarlos a la cola
-      //const serializedData = processedData.map((item) => JSON.stringify(item));
-
-      // Envía los datos procesados (serializados) a la cola
-      //await this.queueService.enqueueData(serializedData);
+        // Envía los datos procesados (serializados) a la cola
+        await this.queueService.enqueueData([serializedData]); // Convertir serializedData a un array
+      } catch (error) {
+        console.error(
+          'Error procesando los datos o enviando a Redis:',
+          error.message,
+        );
+      }
     });
 
     this.client.on('error', (err) => {

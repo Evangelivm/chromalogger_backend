@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model test_record {
+  id           Int       @id @default(autoincrement())
+  DEPTH        String?   @db.VarChar(255)
+  HOLE_DEPTH   String?   @db.VarChar(255)
+  BLOCK_HEIGHT String?   @db.VarChar(255)
+  ROP          String?   @db.VarChar(255)
+  HOOKLOAD     String?   @db.VarChar(255)
+  SLIPS        String?   @db.VarChar(255)
+  ON_BOTTOM    String?   @db.VarChar(255)
+  RPM          String?   @db.VarChar(255)
+  FLOW         String?   @db.VarChar(255)
+  SPP          String?   @db.VarChar(255)
+  SPM1         String?   @db.VarChar(255)
+  SPM2         String?   @db.VarChar(255)
+  WOB          String?   @db.VarChar(255)
+  TORQ         String?   @db.VarChar(255)
+  INC          String?   @db.VarChar(255)
+  AZM          String?   @db.VarChar(255)
+  AZMC         String?   @db.VarChar(255)
+  GTOT         String?   @db.VarChar(255)
+  BTOT         String?   @db.VarChar(255)
+  DIP          String?   @db.VarChar(255)
+  TF           String?   @db.VarChar(255)
+  GAM          String?   @db.VarChar(255)
+  time         DateTime? @db.DateTime(0)
+}

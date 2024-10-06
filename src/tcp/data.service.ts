@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { DateTime } from 'luxon';
 
 @Injectable()
 export class DataService {
@@ -31,43 +32,57 @@ export class DataService {
 
   processData(data: string) {
     const lines = data.split('\n').map((line) => line.trim());
-    const result = [];
+    const result = {};
 
+    // Inicializar todas las variables en null para este bloque de datos
+    Object.keys(this.codeMap).forEach((code) => {
+      result[this.codeMap[code]] = null; // Inicialmente todas las variables tienen valor null
+    });
+
+    // Procesar cada línea de datos recibida
     for (const line of lines) {
-      const code = line.slice(0, 4);
-      const value = line.slice(4).trim();
+      const code = line.slice(0, 4); // Extraer el código (primeros 4 caracteres)
+      const value = line.slice(4).trim(); // Extraer el valor restante
 
       if (this.codeMap[code]) {
         let processedValue = value;
 
-        // Reemplazo específico para ON_BOTTOM
-        if (this.codeMap[code] === 'ON_BOTTOM') {
+        // Reemplazo específico para ON_BOTTOM y SLIPS
+        if (
+          this.codeMap[code] === 'ON_BOTTOM' ||
+          this.codeMap[code] === 'SLIPS'
+        ) {
           processedValue = value === '1' ? 'YES' : 'NO';
         }
 
-        // Reemplazo específico para SLIPS
-        if (this.codeMap[code] === 'SLIPS') {
-          processedValue = value === '1' ? 'YES' : 'NO';
-        }
+        // Actualiza el valor procesado en el resultado
+        result[this.codeMap[code]] = processedValue;
 
-        // Actualiza el valor anterior en la estructura
+        // Actualiza también en previousData para mantener el valor retenido
         this.previousData[this.codeMap[code]] = processedValue;
-
-        result.push({ [this.codeMap[code]]: processedValue });
       }
     }
 
-    // Agregar timestamp
-    const timestamp = new Date().toLocaleString();
-    result.push({ timestamp });
+    // Añadir la marca de tiempo
+    const date = DateTime.now(); // Fecha actual
+    const timeZone = 'America/Lima'; // Especifica tu zona horaria
 
-    // Asegurar que siempre se envíen todos los valores retenidos
-    const completeResult = Object.entries(this.previousData).map(
-      ([name, value]) => ({ [name]: value }),
-    );
-    completeResult.push({ timestamp });
-    // Devuelve el resultado completo en lugar de solo hacer console.log
-    //return completeResult;
-    console.log('Datos procesados:', { dataGroup: completeResult });
+    // Crea un objeto DateTime en la zona horaria específica
+    const zonedDate = date.setZone(timeZone);
+    const timestamp = zonedDate.toISO();
+
+    // Asegurar que siempre se envíen todos los valores retenidos desde previousData si no fueron enviados en este bloque
+    Object.keys(this.previousData).forEach((key) => {
+      if (result[key] === null) {
+        result[key] = this.previousData[key];
+      }
+    });
+
+    // Agregar la marca de tiempo al resultado
+    result['timestamp'] = timestamp;
+    //console.log('Datos procesados:', { dataGroup: result });
+
+    // Retornar el resultado como un array de objetos, con el formato deseado
+    return { dataGroup: [result] };
   }
 }
