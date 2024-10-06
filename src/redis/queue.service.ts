@@ -41,7 +41,10 @@ export class QueueService implements OnModuleInit {
         const queueLength = Number(
           await this.redisService.getQueueLength(this.QUEUE_2),
         );
-        console.log(`Tamaño actual de la cola 2a: ${queueLength}`);
+        console.log(
+          '\x1b[35m%s\x1b[0m',
+          `Tamaño actual de la cola 2a: ${queueLength}`,
+        );
       }
     }
   }
@@ -51,10 +54,16 @@ export class QueueService implements OnModuleInit {
       const queueLength = Number(
         await this.redisService.getQueueLength(this.QUEUE_2),
       );
-      console.log(`Tamaño actual de la cola 2b: ${queueLength}`);
+      console.log(
+        '\x1b[34m%s\x1b[0m',
+        `Tamaño actual de la cola 2b: ${queueLength}`,
+      );
 
       if (queueLength >= 100) {
-        console.log(`La cola 2 tiene 100 o más registros, procesando...`);
+        console.log(
+          '\x1b[33m%s\x1b[0m',
+          `La cola 2 tiene 100 o más registros, procesando...`,
+        );
         await this.redisService.setProcessingFlag(this.PROCESSING_FLAG, 'true');
 
         const dataToInsert = [];
@@ -67,13 +76,19 @@ export class QueueService implements OnModuleInit {
         }
         //console.log(dataToInsert);
         await this.mysqlService.insertData(dataToInsert);
-        console.log('Se ha enviado la información a la base de datos');
+        console.log(
+          '\x1b[36m%s\x1b[0m',
+          'Se ha enviado la información a la base de datos',
+        );
 
         await this.redisService.setProcessingFlag(
           this.PROCESSING_FLAG,
           'false',
         );
-        console.log('Flag de procesamiento restablecido a false');
+        console.log(
+          '\x1b[33m%s\x1b[0m',
+          'Flag de procesamiento restablecido a false',
+        );
 
         await this.restoreQueue1();
       }
@@ -86,14 +101,20 @@ export class QueueService implements OnModuleInit {
     while (true) {
       const data = await this.redisService.popFromQueue(this.QUEUE_1);
       if (!data) {
-        console.log('No hay más datos en la cola 1 para mover a la cola 2');
+        console.log(
+          '\x1b[33m%s\x1b[0m',
+          'No hay más datos en la cola 1 para mover a la cola 2',
+        );
         break;
       }
       await this.redisService.pushToQueue(this.QUEUE_2, data);
       const queueLength = Number(
         await this.redisService.getQueueLength(this.QUEUE_2),
       );
-      console.log(`Datos restaurados de la cola 1 a la cola 2: ${data}`);
+      console.log(
+        '\x1b[33m%s\x1b[0m',
+        `Datos restaurados de la cola 1 a la cola 2: ${data}`,
+      );
       console.log(
         `Tamaño actual de la cola 2 después de restaurar: ${queueLength}`,
       );

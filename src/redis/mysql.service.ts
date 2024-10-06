@@ -46,7 +46,7 @@ export class MysqlService {
         skipDuplicates: true, // Evita duplicados
       });
 
-      console.log('Datos insertados correctamente');
+      console.log('\x1b[32m%s\x1b[0m', 'Datos insertados correctamente');
     } catch (error) {
       console.error('Error al insertar datos:', error);
     }
