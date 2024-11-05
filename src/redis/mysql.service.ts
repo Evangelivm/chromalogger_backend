@@ -34,7 +34,8 @@ export class MysqlService {
         DIP: item.DIP,
         TF: item.TF,
         GAM: item.GAM,
-        time: item.timestamp,
+        time: item.time,
+        // time: item.timestamp,
         // Convierte el timestamp de texto a Date antes de guardarlo
         //time: this.convertTimestamp(item.timestamp),
       })),
@@ -52,30 +53,30 @@ export class MysqlService {
     }
   }
 
-  // Función para convertir el timestamp de texto a un objeto Date
-  private convertTimestamp(timestamp: string): Date {
-    // Paso 1: Reemplazar `p. m.` y `a. m.` por 'PM' y 'AM'
-    const normalizedTimestamp = timestamp
-      .replace('p. m.', 'PM')
-      .replace('a. m.', 'AM');
+  // // Función para convertir el timestamp de texto a un objeto Date
+  // private convertTimestamp(timestamp: string): Date {
+  //   // Paso 1: Reemplazar `p. m.` y `a. m.` por 'PM' y 'AM'
+  //   const normalizedTimestamp = timestamp
+  //     .replace('p. m.', 'PM')
+  //     .replace('a. m.', 'AM');
 
-    // Paso 2: Separar la fecha y la hora
-    const [datePart, timePart] = normalizedTimestamp.split(', ');
+  //   // Paso 2: Separar la fecha y la hora
+  //   const [datePart, timePart] = normalizedTimestamp.split(', ');
 
-    // Paso 3: Convertir la fecha de 'día/mes/año' a 'año-mes-día' para formato ISO
-    const [day, month, year] = datePart.split('/').map(Number);
+  //   // Paso 3: Convertir la fecha de 'día/mes/año' a 'año-mes-día' para formato ISO
+  //   const [day, month, year] = datePart.split('/').map(Number);
 
-    // Paso 4: Crear una cadena de fecha y hora en formato ISO para JavaScript
-    const isoDateString = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T${timePart}`;
+  //   // Paso 4: Crear una cadena de fecha y hora en formato ISO para JavaScript
+  //   const isoDateString = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T${timePart}`;
 
-    // Paso 5: Crear un objeto Date con la cadena ISO generada
-    const date = new Date(isoDateString);
+  //   // Paso 5: Crear un objeto Date con la cadena ISO generada
+  //   const date = new Date(isoDateString);
 
-    // Verificar si el objeto Date es válido
-    if (isNaN(date.getTime())) {
-      throw new Error(`Fecha inválida: ${timestamp}`);
-    }
+  //   // Verificar si el objeto Date es válido
+  //   if (isNaN(date.getTime())) {
+  //     throw new Error(`Fecha inválida: ${timestamp}`);
+  //   }
 
-    return date;
-  }
+  //   return date;
+  // }
 }

@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { DateTime } from 'luxon';
+import { WebsocketGateway } from 'src/websocket/websocket.gateway';
 
 @Injectable()
 export class DataService {
   private previousData = {};
+
+  constructor(private websocketGateway: WebsocketGateway) {}
 
   private codeMap = {
     '0108': 'DEPTH',
@@ -63,13 +65,12 @@ export class DataService {
       }
     }
 
-    // Añadir la marca de tiempo
-    const date = DateTime.now(); // Fecha actual
-    const timeZone = 'America/Lima'; // Especifica tu zona horaria
+    // Función para formatear la fecha en formato ISO-8601
+    const formatDate = (date: Date) => {
+      return date.toISOString(); // Formato ISO-8601
+    };
 
-    // Crea un objeto DateTime en la zona horaria específica
-    const zonedDate = date.setZone(timeZone);
-    const timestamp = zonedDate.toISO();
+    const timestamp = formatDate(new Date());
 
     // Asegurar que siempre se envíen todos los valores retenidos desde previousData si no fueron enviados en este bloque
     Object.keys(this.previousData).forEach((key) => {
@@ -79,10 +80,16 @@ export class DataService {
     });
 
     // Agregar la marca de tiempo al resultado
-    result['timestamp'] = timestamp;
-    //console.log('Datos procesados:', { dataGroup: result });
+    result['time'] = timestamp;
+    // result['timestamp'] = timestamp;
+    // console.log('Datos procesados:', { dataGroup: result });
+
+    const dataGroup = { dataGroup: [result] };
+
+    // Emitir datos a través del WebSocket
+    this.websocketGateway.emitData(dataGroup);
 
     // Retornar el resultado como un array de objetos, con el formato deseado
-    return { dataGroup: [result] };
+    return dataGroup;
   }
 }
