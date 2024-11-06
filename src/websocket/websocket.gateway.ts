@@ -22,11 +22,11 @@ export class WebsocketGateway
   }
 
   handleConnection(client: Socket) {
-    console.log(`Client connected: ${client.id}`);
+    console.log(`Cliente conectado a Websocket: ${client.id}`);
   }
 
   handleDisconnect(client: Socket) {
-    console.log(`Client disconnected: ${client.id}`);
+    console.log(`Cliente desconectado a Websocket: ${client.id}`);
   }
 
   // Método para emitir datos procesados
