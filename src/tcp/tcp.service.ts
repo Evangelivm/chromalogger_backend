@@ -2,6 +2,10 @@ import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { Socket } from 'net';
 import { DataService } from './data.service';
 import { QueueService } from '../redis/queue.service';
+import * as dotenv from 'dotenv';
+
+// Cargar las variables de entorno
+dotenv.config();
 
 @Injectable()
 export class TcpService implements OnModuleInit, OnModuleDestroy {
@@ -25,11 +29,15 @@ export class TcpService implements OnModuleInit, OnModuleDestroy {
   connect() {
     this.client = new Socket();
 
+    // Obtén el host y el puerto desde las variables de entorno, con valores por defecto
+    const host = process.env.TCP_HOST || '127.0.0.1';
+    const port = parseInt(process.env.TCP_PORT || '1234', 10);
+
     const tryConnect = () => {
       if (this.isConnected) return; // Evita múltiples intentos si ya está conectado
 
-      this.client.connect(1234, '127.0.0.1', () => {
-        console.log('Conectado al datalogger en 127.0.0.1:1234');
+      this.client.connect(port, host, () => {
+        console.log(`Conectado al datalogger en ${host}:${port}`);
         this.isConnected = true;
       });
     };
