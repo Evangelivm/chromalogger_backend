@@ -1,6 +1,9 @@
 // redis/redis.service.ts
 import { Injectable } from '@nestjs/common';
 import Redis from 'ioredis';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 @Injectable()
 export class RedisService {
@@ -9,8 +12,8 @@ export class RedisService {
   constructor() {
     // Configura la conexión a Redis
     this.redisClient = new Redis({
-      host: 'localhost', // Cambia esto según tu configuración de Redis
-      port: 6379,
+      host: process.env.REDIS_HOST || 'localhost', // Cambia esto según tu configuración de Redis
+      port: parseInt(process.env.REDIS_PORT || '6379'),
     });
   }
 
