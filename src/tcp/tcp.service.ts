@@ -37,7 +37,7 @@ export class TcpService implements OnModuleInit, OnModuleDestroy {
       if (this.isConnected) return; // Evita múltiples intentos si ya está conectado
 
       this.client.connect(port, host, () => {
-        console.log(`Conectado al datalogger en ${host}:${port}`);
+        console.log(`Datalogger connected in ${host}:${port}`);
         this.isConnected = true;
       });
     };

@@ -41,10 +41,7 @@ export class QueueService implements OnModuleInit {
         const queueLength = Number(
           await this.redisService.getQueueLength(this.QUEUE_2),
         );
-        console.log(
-          '\x1b[35m%s\x1b[0m',
-          `Tamaño actual de la cola 2a: ${queueLength}`,
-        );
+        console.log('\x1b[35m%s\x1b[0m', `Queue 2a: ${queueLength}`);
       }
     }
   }
@@ -54,15 +51,12 @@ export class QueueService implements OnModuleInit {
       const queueLength = Number(
         await this.redisService.getQueueLength(this.QUEUE_2),
       );
-      console.log(
-        '\x1b[34m%s\x1b[0m',
-        `Tamaño actual de la cola 2b: ${queueLength}`,
-      );
+      console.log('\x1b[34m%s\x1b[0m', `Queue 2b: ${queueLength}`);
 
       if (queueLength >= 100) {
         console.log(
           '\x1b[33m%s\x1b[0m',
-          `La cola 2 tiene 100 o más registros, procesando...`,
+          `Queue 2 with 100 elements, Process...`,
         );
         await this.redisService.setProcessingFlag(this.PROCESSING_FLAG, 'true');
 
@@ -76,19 +70,13 @@ export class QueueService implements OnModuleInit {
         }
         //console.log(dataToInsert);
         await this.mysqlService.insertData(dataToInsert);
-        console.log(
-          '\x1b[36m%s\x1b[0m',
-          'Se ha enviado la información a la base de datos',
-        );
+        console.log('\x1b[36m%s\x1b[0m', 'Info sent to DB!!');
 
         await this.redisService.setProcessingFlag(
           this.PROCESSING_FLAG,
           'false',
         );
-        console.log(
-          '\x1b[33m%s\x1b[0m',
-          'Flag de procesamiento restablecido a false',
-        );
+        console.log('\x1b[33m%s\x1b[0m', 'Process flag to false');
 
         await this.restoreQueue1();
       }
@@ -103,7 +91,7 @@ export class QueueService implements OnModuleInit {
       if (!data) {
         console.log(
           '\x1b[33m%s\x1b[0m',
-          'No hay más datos en la cola 1 para mover a la cola 2',
+          'No more data in Queue 1 to move to Queque 2',
         );
         break;
       }
