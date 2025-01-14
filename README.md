@@ -96,3 +96,5 @@ Caso contrario, usa este comando:
 ```bash
 docker-compose up
 ```
+
+Traten de siempre tener las colas de redis limpias para evitar trabas

@@ -33,7 +33,6 @@
     "luxon": "^3.5.0",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
-    "serialport": "^13.0.0",
     "socket.io": "^4.8.1"
   },
   "devDependencies": {
