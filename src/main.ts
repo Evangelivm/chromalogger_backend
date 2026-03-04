@@ -10,7 +10,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: '*',
+    // When using credentials, origin cannot be '*'.
+    // Restrict to the allowed frontend host(s); can also be a function or env variable.
+    origin: process.env.FRONTEND_URL || 'http://161.132.47.226:3001',
     credentials: true,
   });
 
