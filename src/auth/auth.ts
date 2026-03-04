@@ -12,14 +12,17 @@ export const auth = betterAuth({
     enabled: true,
     disableSignUp: true,
     password: {
-      hash: (password) =>
-        hash(password, { algorithm: Algorithm.Argon2id }),
+      hash: (password) => hash(password, { algorithm: Algorithm.Argon2id }),
       verify: ({ hash: hashed, password }) =>
         verify(hashed, password, { algorithm: Algorithm.Argon2id }),
     },
   },
   plugins: [username()],
-  trustedOrigins: ['http://localhost:3001'],
+  trustedOrigins: [
+    'http://localhost:3001',
+    // add any other allowed origins for your frontend
+    process.env.FRONTEND_URL || 'http://161.132.47.226:3001',
+  ],
   user: {
     additionalFields: {
       role: {
