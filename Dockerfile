@@ -5,7 +5,7 @@ FROM node:22-slim
 WORKDIR /app
 
 # Instala OpenSSL para Prisma
-# RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 # Copia los archivos de tu proyecto necesarios para instalar dependencias
 COPY package*.json ./
