@@ -1,8 +1,11 @@
 # Usa una imagen base de Node.js
-FROM node:18
+FROM node:22-slim
 
 # Establece el directorio de trabajo dentro del contenedor
 WORKDIR /app
+
+# Instala OpenSSL para Prisma
+# RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 # Copia los archivos de tu proyecto necesarios para instalar dependencias
 COPY package*.json ./
@@ -28,4 +31,4 @@ RUN npm run build
 EXPOSE 3000
 
 # Comando para sincronizar el esquema con la base de datos y ejecutar la aplicación
-CMD ["sh", "-c", "npx prisma db push && npm run start:prod"]
+CMD ["sh", "-c", "npm run start:prod"]

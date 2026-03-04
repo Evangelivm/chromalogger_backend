@@ -97,4 +97,4 @@ Caso contrario, usa este comando:
 docker-compose up
 ```
 
-Traten de siempre tener las colas de redis limpias para evitar trabas
+Traten de siempre tener las colas de redis limpias para evitar trabas!!!!!

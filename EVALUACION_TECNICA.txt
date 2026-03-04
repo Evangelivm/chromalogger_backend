@@ -1,0 +1,143 @@
+================================================================================
+EVALUACION TECNICA ESTRICTA — ChromaLogger
+Fecha: 2026-02-27
+================================================================================
+
+NOTA GENERAL: 5/10 — Funciona, pero con problemas serios
+
+================================================================================
+BACKEND
+================================================================================
+
+--- PROBLEMAS CRITICOS ---
+
+1. ARQUITECTURA DE COLAS FRAGIL
+   El sistema de dos colas implementado a mano en Redis con intervalos de
+   setInterval de 1 segundo es un antipatron. NestJS tiene integracion nativa
+   con Bull/BullMQ para esto. La implementacion manual tiene race conditions
+   potenciales y no tiene manejo de fallos (si el insert falla, los 100
+   registros se pierden sin recovery).
+
+2. UN SOLO MODELO PARA TODO
+   La tabla test_record tiene todos los campos como VARCHAR(255). Datos
+   numericos como DEPTH, RPM, TORQ deberian ser FLOAT o DECIMAL. Esto hace
+   imposible hacer queries utiles (rangos, promedios, agregaciones) y
+   desperdicia espacio en disco.
+
+3. SIN AUTENTICACION EN LA API
+   Cualquiera puede hacer GET /tcp/start o GET /tcp/stop y conectar o
+   desconectar el datalogger fisico. En un sistema industrial esto es
+   inaceptable.
+
+4. WEBSOCKET SIN AUTENTICACION NI NAMESPACES
+   Todos los clientes conectados reciben todos los datos sin ningun filtro.
+   No hay rooms, no hay validacion de token en el handshake del socket.
+
+5. SIN MANEJO DE ERRORES REAL
+   Solo hay console.log con colores. No hay reintentos con backoff exponencial,
+   no hay alertas si la conexion TCP falla por mas de X tiempo, no hay Dead
+   Letter Queue para registros que fallaron al insertarse.
+
+6. CORS ABIERTO A *
+   En produccion con datos industriales sensibles, origin: '*' es un problema
+   de seguridad grave.
+
+--- PROBLEMAS MODERADOS ---
+
+- Sin tests: La carpeta test/ existe pero esta practicamente vacia.
+  Cero cobertura de la logica de negocio critica.
+
+- Sin DTOs ni validacion: Los datos del datalogger se consumen tal cual,
+  sin validar que tengan el formato esperado.
+
+- Logging con console.log coloreado: Para produccion se necesita un logger
+  estructurado (Winston, Pino) con niveles, contexto y rotacion de archivos.
+
+- Credenciales en .env commiteado: El .gitignore deberia excluirlo, pero
+  hay credenciales de produccion visibles en el repositorio.
+
+- DATABASE_URL en texto plano con usuario y contrasena real visible en el codigo.
+
+================================================================================
+FRONTEND
+================================================================================
+
+--- PROBLEMAS CRITICOS ---
+
+1. SIN MANEJO DEL ESTADO DEL SOCKET
+   Si el WebSocket se desconecta, el dashboard muestra los ultimos datos
+   recibidos sin ninguna indicacion de que son datos viejos. No hay timestamp
+   visible ni indicador de "ultima actualizacion hace X segundos". En un
+   entorno industrial esto puede llevar a decisiones basadas en datos obsoletos.
+
+2. SIN RECONEXI0N ROBUSTA DEL SOCKET
+   Si el backend se cae y vuelve, no esta claro si el cliente se reconecta
+   automaticamente y resetea el estado correctamente.
+
+3. PROTECCION DE RUTAS INCOMPLETA
+   Las rutas /gauges y /wits no estan en el middleware de proteccion. Cualquiera
+   sin autenticarse puede acceder a datos de operaciones de perforacion.
+
+4. DATOS HARDCODEADOS
+   "Pozo 1" esta hardcodeado en el codigo. El sistema no soporta multiples pozos
+   aunque en el sidebar hay placeholders para ello. Es deuda tecnica visible
+   desde el primer dia.
+
+--- PROBLEMAS MODERADOS ---
+
+- MongoDB para usuarios + MySQL para datos: Dos bases de datos distintas para
+  un sistema pequeno anade complejidad operacional innecesaria. Con Prisma ya
+  configurado, los usuarios podrian ir en MySQL.
+
+- Sin paginacion ni filtros historicos: El frontend solo muestra datos en
+  tiempo real. No hay forma de consultar datos historicos almacenados en MySQL.
+
+- Recharts sin memoizacion: Los charts se re-renderizan con cada nuevo dato.
+  Con alta frecuencia de datos esto puede generar lag visible en el navegador.
+
+- components/ui/ es copy-paste de shadcn/ui con 18 componentes de los cuales
+  varios probablemente no se usan en ninguna pagina.
+
+- Sin manejo de errores en formularios: Los forms de login/register tienen
+  validacion basica pero el manejo de errores del servidor es minimo.
+
+================================================================================
+PROBLEMAS DE DISENO GENERAL
+================================================================================
+
+  PROBLEMA                          IMPACTO
+  --------------------------------  ------------------------------------------
+  Sin rate limiting                 Alguien puede spamear /tcp/start y /stop
+  Sin logging estructurado          Debugging en produccion es casi imposible
+  Sin monitoreo/healthchecks        No se sabe si el sistema esta sano
+  Sin documentacion de API          Ni Swagger basico implementado
+  Sin CI/CD                         No hay pipeline de tests ni despliegue auto
+  Sin estrategia de backup MySQL    Si el contenedor cae, datos historicos perdidos
+
+================================================================================
+LO QUE SI ESTA BIEN
+================================================================================
+
+  + La idea del pipeline TCP -> Redis -> WebSocket -> DB es correcta
+  + Usar Docker Compose para el despliegue esta bien
+  + NestJS y Next.js son elecciones de stack solidas y apropiadas
+  + El sistema de autenticacion con bcrypt y JWT es correcto en lo basico
+  + Prisma como ORM es una buena eleccion para el proyecto
+
+================================================================================
+CONCLUSION
+================================================================================
+
+Es un prototipo funcional que demuestra que el concepto funciona, pero no esta
+listo para produccion industrial real.
+
+Los problemas mas graves son:
+  1. Falta de autenticacion en endpoints criticos
+  2. Tipos de datos incorrectos en la base de datos
+  3. Ausencia de manejo de errores robusto
+  4. Falta total de tests
+
+Antes de desplegarlo en un pozo real, necesitaria una revision significativa
+en seguridad, resiliencia y calidad de codigo.
+
+================================================================================

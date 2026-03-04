@@ -33,3 +33,78 @@ model test_record {
   GAM          String?   @db.VarChar(255)
   time         DateTime? @db.DateTime(0)
 }
+
+model user {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean
+  image         String?
+  createdAt     DateTime
+  updatedAt     DateTime
+  username      String?   @unique
+  role          String    @default("user")
+  sessions      session[]
+  accounts      account[]
+}
+
+model tcp_config {
+  id        Int      @id @default(autoincrement())
+  host      String
+  port      Int
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+}
+
+model site_config {
+  id          Int      @id @default(1)
+  wellName    String   @default("Pozo 1")
+  companyName String   @default("Enterprise")
+  updatedAt   DateTime @updatedAt
+  updatedBy   String?
+}
+
+model track_config {
+  id        Int      @id @default(1)
+  config    Json
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+}
+
+model session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?  @db.VarChar(255)
+  userAgent String?  @db.Text
+  userId    String
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  user      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?   @db.Text
+  refreshToken          String?   @db.Text
+  idToken               String?   @db.Text
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+}
+
+model verification {
+  id         String    @id
+  identifier String
+  value      String    @db.Text
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+}
